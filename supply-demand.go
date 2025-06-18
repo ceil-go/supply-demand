@@ -1,8 +1,7 @@
-package main
+package supply_demand
 
 import (
 	"fmt"
-	"time"
 )
 
 type Scope struct {
@@ -101,71 +100,11 @@ func createScopedDemand(superProps DemandProps) func(ScopedDemandProps) chan any
 func supplyDemand(rootSupplier Supplier, suppliers map[string]Supplier) chan any {
 	suppliers["$$root"] = rootSupplier
 	demand := DemandProps{
-		Key:  "root",
-		Type: "$$root",
-		Path: "root",
-		Data: nil,
+		Key:       "root",
+		Type:      "$$root",
+		Path:      "root",
+		Data:      nil,
 		Suppliers: suppliers,
 	}
 	return globalDemand(demand)
-}
-
-func thirdSupplier(data any, scope Scope) chan any {
-	fmt.Println("Third supplier function called.")
-	resultCh := make(chan any)
-	go func() {
-		defer close(resultCh)
-		result := <-scope.Demand(ScopedDemandProps{Type: "first"})
-		resultCh <- result
-	}()
-	return resultCh
-}
-
-func main() {
-	suppliers := map[string]Supplier{
-		"first": func(data any, scope Scope) chan any {
-			resultCh := make(chan any)
-			go func() {
-				defer close(resultCh)
-				fmt.Println("First supplier function called.")
-				time.Sleep(1 * time.Second) // Simulate async work
-				resultCh <- "First result"
-			}()
-			return resultCh
-		},
-		"second": func(data any, scope Scope) chan any {
-			resultCh := make(chan any)
-			go func() {
-				defer close(resultCh)
-				fmt.Println("Second supplier function called.")
-				time.Sleep(1 * time.Second) // Simulate async work
-				resultCh <- 2
-			}()
-			return resultCh
-		},
-	}
-
-	rootSupplier := func(data any, scope Scope) chan any {
-		resultCh := make(chan any)
-		go func() {
-			defer close(resultCh)
-			fmt.Println("Root supplier function called.")
-			mergeOps := SuppliersMerge{
-				Add: map[string]Supplier{
-					"third": thirdSupplier,
-				},
-			}
-			result := <-scope.Demand(ScopedDemandProps{Type: "third", SuppliersMerge: mergeOps})
-			if str, ok := result.(string); ok {
-				fmt.Println("Root supplier received result:", str)
-			}
-			resultCh <- result
-		}()
-		return resultCh
-	}
-
-	result := <-supplyDemand(rootSupplier, suppliers)
-	if str, ok := result.(string); ok {
-		fmt.Println("Final result:", str)
-	}
 }
