@@ -56,8 +56,8 @@ func globalDemand(props DemandProps) chan any {
 	resultCh := make(chan any)
 	go func() {
 		defer close(resultCh)
-		fmt.Println("Global demand function called with:")
-		fmt.Printf("Key: %s\nType: %s\nPath: %s\n", props.Key, props.Type, props.Path)
+		// fmt.Println("Global demand function called with:")
+		// fmt.Printf("Key: %s\nType: %s\nPath: %s\n", props.Key, props.Type, props.Path)
 
 		supplier, found := props.Suppliers[props.Type]
 		if !found {
@@ -97,7 +97,7 @@ func createScopedDemand(superProps DemandProps) func(ScopedDemandProps) chan any
 	}
 }
 
-func supplyDemand(rootSupplier Supplier, suppliers map[string]Supplier) chan any {
+func SupplyDemand(rootSupplier Supplier, suppliers map[string]Supplier) chan any {
 	suppliers["$$root"] = rootSupplier
 	demand := DemandProps{
 		Key:       "root",

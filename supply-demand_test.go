@@ -27,7 +27,7 @@ func TestBasicSupplyDemandFlow(t *testing.T) {
 		return resultCh
 	}
 
-	out := <-supplyDemand(rootSupplier, suppliers)
+	out := <-SupplyDemand(rootSupplier, suppliers)
 	if out != "OK" {
 		t.Errorf("expected OK, got %#v", out)
 	}
@@ -63,7 +63,7 @@ func TestSupplierMergeAddAndRemove(t *testing.T) {
 		return resultCh
 	}
 
-	out := <-supplyDemand(rootSupplier, suppliers)
+	out := <-SupplyDemand(rootSupplier, suppliers)
 	if out != "B" {
 		t.Errorf("expected B, got %#v", out)
 	}
@@ -102,7 +102,7 @@ func TestChainedSuppliers(t *testing.T) {
 		"second": supplier2,
 	}
 
-	val := <-supplyDemand(rootSupplier, suppliers)
+	val := <-SupplyDemand(rootSupplier, suppliers)
 	if val != "1&2" {
 		t.Errorf("expected 1&2, got %#v", val)
 	}
@@ -132,5 +132,5 @@ func TestMissingSupplier(t *testing.T) {
 		}()
 		return resultCh
 	}
-	<-supplyDemand(rootSupplier, suppliers) // If there's panic, test will fail
+	<-SupplyDemand(rootSupplier, suppliers) // If there's panic, test will fail
 }
